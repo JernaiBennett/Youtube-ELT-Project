@@ -4,7 +4,7 @@ import logging
 
 logger = logging.getLogger(__name__)
 
-def load_path():
+def load_data():
     # Extraction task writes today's dump to this path, so loading assumes same-day execution.
     file_path = f".data/YT_data_{date.today()}.json"
 
