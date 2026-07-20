@@ -14,7 +14,7 @@ def insert_rows(cur, conn, schema, row):
 
             cur.execute(
                 f"""INSERT INTO {schema}.{table}(
-                    "VIDEO_ID",
+                    "Video_ID",
                     "Video_Title",
                     "Upload_Date",
                     "Duration",
@@ -35,11 +35,11 @@ def insert_rows(cur, conn, schema, row):
         else:
 
             # core/warehouse rows already use the warehouse's own column names
-            video_id = 'VIDEO_ID'
+            video_id = 'Video_ID'
 
             cur.execute(
                 f"""INSERT INTO {schema}.{table}(
-                    "VIDEO_ID",
+                    "Video_ID",
                     "Video_Title",
                     "Upload_Date",
                     "Duration",
@@ -48,7 +48,7 @@ def insert_rows(cur, conn, schema, row):
                     "Likes_Count",
                     "Comments_Count"
                 )
-                VALUES (%(VIDEO_ID)s,
+                VALUES (%(Video_ID)s,
                 %(Video_Title)s,
                 %(Upload_Date)s,
                 %(Duration)s,
@@ -85,7 +85,7 @@ def update_rows(cur, conn, schema, row):
         #core
         else:
             
-            video_id = 'VIDEO_ID'
+            video_id = 'Video_ID'
             upload_date = 'Upload_Date'
             video_title = 'Video_Title'
             video_views =  'Video_Views'
@@ -102,7 +102,7 @@ def update_rows(cur, conn, schema, row):
                     "Video_Views" = %({video_views})s,
                     "Likes_Count" = %({likes_count})s,
                     "Comments_Count" = %({comments_count})s
-                WHERE "VIDEO_ID" = %({video_id})s AND "Upload_Date" = %({upload_date})s;
+                WHERE "Video_ID" = %({video_id})s AND "Upload_Date" = %({upload_date})s;
             """, row,
         )
 
@@ -124,7 +124,7 @@ def delete_rows(cur, conn, schema, ids_to_delete):
         cur.execute(
             f"""
             DELETE FROM {schema}.{table}
-            WHERE "VIDEO_ID" IN {ids_to_delete};
+            WHERE "Video_ID" IN {ids_to_delete};
             """
         )
 

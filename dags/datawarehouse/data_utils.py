@@ -41,7 +41,7 @@ def create_table(schema):
     if schema == 'staging':
         table_sql = f"""
             CREATE TABLE IF NOT EXISTS {schema}.{table} (
-                "VIDEO_ID" VARCHAR(11) PRIMARY KEY NOT NULL,
+                "Video_ID" VARCHAR(11) PRIMARY KEY NOT NULL,
                 "Video_Title" TEXT NOT NULL,
                 "Upload_Date" TIMESTAMP NOT NULL,
                 "Duration" VARCHAR(20) NOT NULL,
@@ -53,7 +53,7 @@ def create_table(schema):
     else:
         table_sql = f"""
             CREATE TABLE IF NOT EXISTS {schema}.{table} (
-                "VIDEO_ID" VARCHAR(11) PRIMARY KEY NOT NULL,
+                "Video_ID" VARCHAR(11) PRIMARY KEY NOT NULL,
                 "Video_Title" TEXT NOT NULL,
                 "Upload_Date" TIMESTAMP NOT NULL,
                 "Duration" VARCHAR(20) NOT NULL,
@@ -73,9 +73,9 @@ def create_table(schema):
 
 def get_video_ids(cur, schema):
     """Fetch all video IDs already present in the given schema's yt_api table."""
-    cur.execute(f"""SELECT "VIDEO_ID" FROM {schema}. {table};""")
+    cur.execute(f"""SELECT "Video_ID" FROM {schema}. {table};""")
     ids = cur.fetchall()
 
-    video_ids = [row['VIDEO_ID'] for row in ids]
+    video_ids = [row['Video_ID'] for row in ids]
 
     return video_ids
