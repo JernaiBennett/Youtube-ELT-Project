@@ -3,6 +3,8 @@ import pendulum
 from datetime import datetime, timedelta
 from api.video_stats import get_playlist_id, get_video_ids, extract_video_data, save_to_json
 
+from datawarehouse.dwh import staging_table, core_table
+
 # Local timezone used to anchor the DAG's start_date and schedule
 local_tz = pendulum.timezone("America/New_York")
 
@@ -40,3 +42,21 @@ def etl_dag():
 
 # Register the DAG with Airflow
 etl_dag()
+
+@dag(
+    dag_id = 'update_db',
+    default_args=default_args,
+    description= 'DAG to process JSON File and insert data into both schemas',
+    schedule='0 15 * * *',   # runs daily at 14:00 (2 PM) local_tz
+    catchup = False           # don't backfill runs for past schedule intervals
+)
+def schema_dag():
+
+    update_staging = staging_table()
+    update_core = core_table()
+
+    # Task dependencies: each step feeds the next
+    update_staging >> update_core
+
+# Register the DAG with Airflow
+schema_dag()

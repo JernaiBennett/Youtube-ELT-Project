@@ -14,7 +14,7 @@ def insert_rows(cur, conn, schema, row):
 
             cur.execute(
                 f"""INSERT INTO {schema}.{table}(
-                    "Video_ID",
+                    "VIDEO_ID",
                     "Video_Title",
                     "Upload_Date",
                     "Duration",
@@ -35,22 +35,24 @@ def insert_rows(cur, conn, schema, row):
         else:
 
             # core/warehouse rows already use the warehouse's own column names
-            video_id = 'Video_ID'
+            video_id = 'VIDEO_ID'
 
             cur.execute(
                 f"""INSERT INTO {schema}.{table}(
-                    "Video_ID",
+                    "VIDEO_ID",
                     "Video_Title",
                     "Upload_Date",
                     "Duration",
+                    "Video_Type",
                     "Video_Views",
                     "Likes_Count",
                     "Comments_Count"
                 )
-                VALUES (%(Video_ID)s,
+                VALUES (%(VIDEO_ID)s,
                 %(Video_Title)s,
                 %(Upload_Date)s,
                 %(Duration)s,
+                %(Video_Type)s,
                 %(Video_Views)s,
                 %(Likes_Count)s,
                 %(Comments_Count)s);
@@ -83,9 +85,9 @@ def update_rows(cur, conn, schema, row):
         #core
         else:
             
-            video_id = 'Video_Id'
+            video_id = 'VIDEO_ID'
             upload_date = 'Upload_Date'
-            video_title = 'Video_title'
+            video_title = 'Video_Title'
             video_views =  'Video_Views'
             likes_count = 'Likes_Count'
             comments_count = 'Comments_Count'
@@ -99,8 +101,8 @@ def update_rows(cur, conn, schema, row):
                 SET "Video_Title" = %({video_title})s,
                     "Video_Views" = %({video_views})s,
                     "Likes_Count" = %({likes_count})s,
-                    "Comments_Count" = %({comments_count})s,
-                WHERE "Video_ID" = %({video_id})s AND "Upload_Date" = %({upload_date})s;  
+                    "Comments_Count" = %({comments_count})s
+                WHERE "VIDEO_ID" = %({video_id})s AND "Upload_Date" = %({upload_date})s;
             """, row,
         )
 
@@ -122,7 +124,7 @@ def delete_rows(cur, conn, schema, ids_to_delete):
         cur.execute(
             f"""
             DELETE FROM {schema}.{table}
-            WHERE "Video_ID" IN {ids_to_delete};
+            WHERE "VIDEO_ID" IN {ids_to_delete};
             """
         )
 
