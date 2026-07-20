@@ -3,15 +3,17 @@ import json
 import os
 from dotenv import load_dotenv
 from datetime import date
+from airflow.decorators import task
+from airflow.models import Variable
 
 load_dotenv(dotenv_path = "./.env" )
 
-API_KEY = os.getenv("API_KEY")
-CHANNEL_HANDLE = "MrBeast"
+API_KEY = Variable.get("API_KEY")
+CHANNEL_HANDLE = Variable.get("CHANNEL_HANDLE")
 max_results = 50
 
 
-
+@task
 def get_playlist_id():
     """Look up the channel's "uploads" playlist ID via the YouTube Data API.
 
@@ -49,7 +51,7 @@ def get_playlist_id():
         raise e
     
 
-
+@task
 def get_video_ids(playlistId):
     """Fetch every video ID contained in a YouTube playlist.
 
@@ -106,7 +108,7 @@ def get_video_ids(playlistId):
         raise e
 
 
-
+@task
 def extract_video_data(video_ids):
     """Fetch title, publish date, duration, and stats for a list of videos.
 
@@ -167,7 +169,7 @@ def extract_video_data(video_ids):
    
     except requests.exceptions.RequestException as e:
         raise e
-
+@task
 def save_to_json(extracted_data):
     """Write extracted video data to a date-stamped JSON file in ./data.
 
