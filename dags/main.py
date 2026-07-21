@@ -2,7 +2,7 @@ from airflow.decorators import dag
 import pendulum
 from datetime import datetime, timedelta
 from api.video_stats import get_playlist_id, get_video_ids, extract_video_data, save_to_json
-
+from airflow.operators.trigger_dagrun import TriggerDagRunOperator
 from datawarehouse.dwh import staging_table, core_table
 from dataquality.soda  import yt_elt_data_quality
 # Local timezone used to anchor the DAG's start_date and schedule
@@ -33,7 +33,7 @@ core_schema = "core"
     schedule='0 14 * * *',   # runs daily at 14:00 (2 PM) local_tz
     catchup = False           # don't backfill runs for past schedule intervals
 )
-def etl_dag():
+def produce_dag():
     # ETL pipeline: resolve the channel's uploads playlist, list its video IDs,
     # pull stats/metadata per video, then persist the result as JSON.
     playlist_id = get_playlist_id()
@@ -41,42 +41,53 @@ def etl_dag():
     extract_data = extract_video_data(video_ids)
     save_to_json_task = save_to_json(extract_data)
 
+    #added triggerer to schedule dags 
+    trigger_update_db = TriggerDagRunOperator(
+        task_id="Trigger_update_db",
+        trigger_dag_id="update_db",
+    )
+
     # Task dependencies: each step feeds the next
     playlist_id >> video_ids >> extract_data >> save_to_json_task
 
 # Register the DAG with Airflow
-etl_dag()
+produce_dag()
 
 @dag(
     dag_id = 'update_db',
     default_args=default_args,
     description= 'DAG to process JSON File and insert data into both schemas',
-    schedule='0 15 * * *',   # runs daily at 14:00 (2 PM) local_tz
+    schedule=None,
     catchup = False           # don't backfill runs for past schedule intervals
 )
-def schema_dag():
+def update_dag():
 
     update_staging = staging_table()
     update_core = core_table()
 
+    #added triggerer to schedule dags 
+    trigger_data_quality = TriggerDagRunOperator(
+        task_id="Trigger_data_quality",
+        trigger_dag_id="data_quality",
+    )
     # Task dependencies: each step feeds the next
-    update_staging >> update_core
+    update_staging >> update_core >> trigger_data_quality
 
-# Register the DAG with Airflow
-schema_dag()
+
+update_dag()
 
 @dag(
     dag_id = 'data_quality',
     default_args=default_args,
     description= 'DAG to check the data quality on both layers in the db',
-    schedule='0 16 * * *',   # runs daily at 14:00 (2 PM) local_tz
+    schedule=None,
     catchup = False           # don't backfill runs for past schedule intervals
 )
 def quality_dag():
 
     soda_validate_staging = yt_elt_data_quality(staging_schema)
     soda_validate_core = yt_elt_data_quality(core_schema)
-
+    
     # Task dependencies: each step feeds the next
     soda_validate_staging >> soda_validate_core
 # Register the DAG with Airflow
