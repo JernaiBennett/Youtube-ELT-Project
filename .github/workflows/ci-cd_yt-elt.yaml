@@ -103,6 +103,12 @@ jobs:
       - name: Check container memory
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: docker stats --no-stream
+      - name: Sync DAGs into metadata DB
+        # Scheduler stays down in CI, but TriggerDagRunOperator (produce_json -> update_db -> data_quality)
+        # looks up target DAGs in DagModel, which only the scheduler normally populates. Reserialize once
+        # so cross-DAG triggers can resolve without a live scheduler.
+        if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
+        run: docker compose run --rm airflow-cli dags reserialize
       - name: Run End-to-End DAG Tests
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         run: |
