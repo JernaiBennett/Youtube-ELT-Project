@@ -92,6 +92,9 @@ jobs:
           # Give airflow-init time to finish its DB migration before airflow-cli runs against it
           sleep 30
           docker ps
+      - name: Dump container logs on failure
+        if: failure() && (steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch')
+        run: docker compose logs
       - name: Run Unit and Integration Tests
         if: steps.changed-files-tests.outputs.any_changed == 'true' || github.event_name == 'workflow_dispatch'
         # airflow-cli is a one-off container (profile: debug) instead of exec'ing into airflow-worker,
