@@ -85,6 +85,8 @@ x-airflow-common:
     # AIRFLOW_VAR_{VARIABLE_NAME}
     AIRFLOW_VAR_API_KEY: ${API_KEY}
     AIRFLOW_VAR_CHANNEL_HANDLE: ${CHANNEL_HANDLE}
+    # Passed through so get_video_ids() can cap results in CI; unset/blank locally means no cap
+    CI_MAX_VIDEOS: ${CI_MAX_VIDEOS}
     # Postgres databases environment variables - Needed for integration and data quality tests
     ELT_DATABASE_NAME: ${ELT_DATABASE_NAME}
     ELT_DATABASE_USERNAME: ${ELT_DATABASE_USERNAME}

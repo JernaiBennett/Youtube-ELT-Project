@@ -72,6 +72,10 @@ def get_video_ids(playlistId):
 
     pageToken = None
 
+    # Set in CI only, to bound how many videos a test run fetches from a real channel
+    ci_max_videos = os.getenv("CI_MAX_VIDEOS")
+    ci_max_videos = int(ci_max_videos) if ci_max_videos else None
+
 
     base_url = f"https://youtube.googleapis.com/youtube/v3/playlistItems?part=contentDetails&maxResults={max_results}&playlistId={playlistId}&key={API_KEY}"
     
@@ -91,10 +95,13 @@ def get_video_ids(playlistId):
             #parse the data
             data = response.json()
 
-            #add video ids if list is not empty
+            #add video ids if list is not empty 
             for item in data.get("items", []):
                 video_id = item["contentDetails"]["videoId"]
                 video_ids.append(video_id)
+                if ci_max_videos and len(video_ids) >= ci_max_videos:
+                    return video_ids[:ci_max_videos]
+ 
 
             #get the next batch of videos
             pageToken = data.get("nextPageToken")
